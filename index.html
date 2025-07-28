@@ -5,16 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Akash Knowledge Hub</title>
   <style>
-    body { font-family: sans-serif; margin: 0; background: #f5f7fa; }
-    header { background: #1e40af; color: white; padding: 1rem; text-align: center; }
-    #search { width: 90%; margin: 1rem auto; padding: 0.5rem; display: block; border-radius: 6px; border: 1px solid #ccc; }
-    .book-grid { display: flex; flex-wrap: wrap; justify-content: space-around; }
-    .book { background: white; margin: 1rem; padding: 1rem; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 30%; box-sizing: border-box; }
-    .book img { width: 100%; border-radius: 12px; }
-    .book h2 { font-size: 1.1rem; margin-top: 0.5rem; }
-    .btn { display: inline-block; margin-top: 0.5rem; background: #2563eb; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 6px; }
-    audio { width: 100%; margin-top: 0.5rem; }
-    @media (max-width: 768px) { .book { width: 100%; } }
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      background: #f5f7fa;
+    }
+    header {
+      background: #1e40af;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    #search {
+      width: 90%;
+      margin: 1rem auto;
+      padding: 0.5rem;
+      display: block;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .book {
+      background: white;
+      margin: 1rem;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .book img {
+      width: 100%;
+      border-radius: 12px;
+    }
+    .book h2 {
+      margin-top: 0.5rem;
+    }
+    button {
+      padding: 0.6rem 1rem;
+      margin-top: 0.5rem;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -25,47 +60,67 @@
 
   <input type="text" id="search" placeholder="Search books..." />
 
-  <div class="book-grid" id="bookContainer">Loading...</div>
+  <div id="bookList"></div>
 
   <script>
-    const sheetID = "1dXl7SGH_QLvrCsAV8g0_ZOvNDrtxVuOVZFz8fQVKIUM";
-    const sheetName = "Sheet2"; // Update if your sheet name is different
-    const apiURL = `https://opensheet.vercel.app/${sheetID}/${sheetName}`;
+    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSZXKovHDlqcv2eW0Txq3tsNTc3qRQ9BPTq3UqR5UOcI7oCQzPLNq2-qeKOiX9ItzDX1FdM2RPK06e1/pub?output=csv";
 
-    async function loadBooks() {
-      const res = await fetch(apiURL);
-      const data = await res.json();
+    async function fetchBooks() {
+      const res = await fetch(sheetURL);
+      const data = await res.text();
+      const rows = data.split("\n").slice(1);
+      const bookList = document.getElementById("bookList");
 
-      const container = document.getElementById("bookContainer");
-      container.innerHTML = "";
+      rows.forEach(row => {
+        const cols = row.split(",");
 
-      data.forEach(book => {
-        const div = document.createElement("div");
-        div.className = "book";
-        div.innerHTML = `
-          <img src="${book.Cover}" alt="${book.Title}" />
-          <h2>${book.Title}</h2>
-          <p><strong>Price:</strong> ₹${book.Price}</p>
-          <a href="upi://pay?pa=9270582266@ibl&pn=Akash%20Kadam&am=${book.Price}&cu=INR" class="btn">Buy Now</a>
-          ${book.Summary ? `<a href="${book.Summary}" class="btn" download>Summary</a>` : ""}
-          ${book.ActionPlan ? `<a href="${book.ActionPlan}" class="btn" download>Action Plan</a>` : ""}
-          ${book.PDF ? `<a href="${book.PDF}" class="btn" download>Download Book</a>` : ""}
-          ${book.Audio ? `<audio controls src="${book.Audio}"></audio>` : ""}
+        const [title, price, cover, summary, actionPlan, audio, pdf] = cols;
+
+        const book = document.createElement("div");
+        book.className = "book";
+
+        book.innerHTML = `
+          <img src="${cover}" alt="${title}" onerror="this.src='https://via.placeholder.com/150'"/>
+          <h2>${title}</h2>
+          <p><strong>Price:</strong> ₹${price}</p>
+          <button onclick="showPayment(this)">Buy Now</button>
+          <div class="hidden">
+            <p>Have you completed the payment?</p>
+            <button onclick="showContent(this)">Yes</button>
+            <button onclick="this.parentElement.classList.add('hidden')">No</button>
+          </div>
+          <div class="hidden">
+            <p><strong>Summary:</strong> ${summary}</p>
+            <p><strong>Action Plan:</strong> ${actionPlan}</p>
+            <audio controls src="${audio}"></audio><br>
+            <a href="${pdf}" target="_blank" download><button>Download PDF</button></a>
+          </div>
         `;
-        container.appendChild(div);
+
+        bookList.appendChild(book);
       });
     }
 
-    document.getElementById("search").addEventListener("input", function() {
+    function showPayment(btn) {
+      const paymentDiv = btn.nextElementSibling;
+      paymentDiv.classList.remove("hidden");
+    }
+
+    function showContent(btn) {
+      const contentDiv = btn.parentElement.nextElementSibling;
+      contentDiv.classList.remove("hidden");
+      btn.parentElement.classList.add("hidden");
+    }
+
+    document.getElementById("search").addEventListener("input", function () {
       const query = this.value.toLowerCase();
-      const books = document.querySelectorAll(".book");
-      books.forEach(book => {
+      document.querySelectorAll(".book").forEach(book => {
         const title = book.querySelector("h2").textContent.toLowerCase();
-        book.style.display = title.includes(query) ? "block" : "none";
+        book.style.display = title.includes(query) ? "" : "none";
       });
     });
 
-    loadBooks();
+    fetchBooks();
   </script>
 </body>
 </html>
