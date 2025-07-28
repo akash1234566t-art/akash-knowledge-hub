@@ -5,120 +5,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Akash Knowledge Hub</title>
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      background: #f5f7fa;
-    }
-    header {
-      background: #1e40af;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-    }
-    #search {
-      width: 90%;
-      margin: 1rem auto;
-      padding: 0.5rem;
-      display: block;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    .book {
-      background: white;
-      margin: 1rem;
-      padding: 1rem;
-      border-radius: 12px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .book img {
-      width: 100%;
-      border-radius: 12px;
-    }
-    .book h2 {
-      margin-top: 0.5rem;
-    }
-    button {
-      padding: 0.6rem 1rem;
-      margin-top: 0.5rem;
-      background: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .hidden {
-      display: none;
-    }
+    body { font-family: sans-serif; margin: 0; background: #f5f7fa; }
+    header { background: #1e40af; color: white; padding: 1rem; text-align: center; }
+    #search { width: 90%; margin: 1rem auto; padding: 0.5rem; display: block; border-radius: 6px; border: 1px solid #ccc; }
+    .book-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; padding: 1rem; }
+    .book { background: white; padding: 1rem; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .book img { width: 100%; border-radius: 12px; }
+    .book h2 { font-size: 1.2rem; margin: 0.5rem 0; }
+    .btn { display: block; text-align: center; margin-top: 0.5rem; background: #2563eb; color: white; padding: 0.5rem; border-radius: 6px; text-decoration: none; }
+    audio { width: 100%; margin-top: 0.5rem; }
+    footer nav { position: fixed; bottom: 0; width: 100%; background: #e5e7eb; display: flex; justify-content: space-around; padding: 0.5rem 0; }
   </style>
 </head>
 <body>
   <header>
     <h1>📚 Akash Knowledge Hub</h1>
-    <p>Read, Listen & Learn | Pay via UPI</p>
+    <p>Read and Listen to Books | Pay via UPI</p>
   </header>
 
-  <input type="text" id="search" placeholder="Search books..." />
+  <input type="text" id="search" placeholder="Search books..." oninput="searchBooks()" />
 
-  <div id="bookList"></div>
+  <div id="books" class="book-grid"></div>
+
+  <footer>
+    <nav>
+      <span>🏠 Home</span>
+      <span>📤 Upload</span>
+      <span>👤 Your Account</span>
+      <span>⚙️ Dashboard</span>
+    </nav>
+  </footer>
 
   <script>
-    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSZXKovHDlqcv2eW0Txq3tsNTc3qRQ9BPTq3UqR5UOcI7oCQzPLNq2-qeKOiX9ItzDX1FdM2RPK06e1/pub?output=csv";
+    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcOxLgaP_oMF4lRMPXvOqTkSi0jD4S7AYBEAYTNQvoVUTWKrK-TSVb7R0nMNZRV_G9cdUdc7kfhW1e/pub?output=tsv";
 
     async function fetchBooks() {
       const res = await fetch(sheetURL);
       const data = await res.text();
-      const rows = data.split("\n").slice(1);
-      const bookList = document.getElementById("bookList");
+      const rows = data.trim().split("\n").slice(1);
+      const books = rows.map(row => {
+        const [title, cover, summary, audio, pdf, price, upi] = row.split("\t");
+        return { title, cover, summary, audio, pdf, price, upi };
+      });
 
-      rows.forEach(row => {
-        const cols = row.split(",");
-
-        const [title, price, cover, summary, actionPlan, audio, pdf] = cols;
-
-        const book = document.createElement("div");
-        book.className = "book";
-
-        book.innerHTML = `
-          <img src="${cover}" alt="${title}" onerror="this.src='https://via.placeholder.com/150'"/>
-          <h2>${title}</h2>
-          <p><strong>Price:</strong> ₹${price}</p>
-          <button onclick="showPayment(this)">Buy Now</button>
-          <div class="hidden">
-            <p>Have you completed the payment?</p>
-            <button onclick="showContent(this)">Yes</button>
-            <button onclick="this.parentElement.classList.add('hidden')">No</button>
-          </div>
-          <div class="hidden">
-            <p><strong>Summary:</strong> ${summary}</p>
-            <p><strong>Action Plan:</strong> ${actionPlan}</p>
-            <audio controls src="${audio}"></audio><br>
-            <a href="${pdf}" target="_blank" download><button>Download PDF</button></a>
-          </div>
+      const booksContainer = document.getElementById("books");
+      booksContainer.innerHTML = "";
+      books.forEach(book => {
+        const bookEl = document.createElement("div");
+        bookEl.className = "book";
+        bookEl.innerHTML = `
+          <img src="${book.cover}" alt="Book Cover" />
+          <h2>${book.title}</h2>
+          <p>Price: ₹${book.price || 'Free'}</p>
+          <a class="btn" href="upi://pay?pa=${book.upi}&pn=${book.title}&am=${book.price}&cu=INR" target="_blank">Buy Now</a>
+          ${book.summary ? `<a class="btn" href="${book.summary}" download>Download Summary</a>` : ''}
+          ${book.pdf ? `<a class="btn" href="${book.pdf}" download>Download Book</a>` : ''}
+          ${book.audio ? `<audio controls><source src="${book.audio}" type="audio/mpeg" /></audio>` : ''}
         `;
-
-        bookList.appendChild(book);
+        booksContainer.appendChild(bookEl);
       });
     }
 
-    function showPayment(btn) {
-      const paymentDiv = btn.nextElementSibling;
-      paymentDiv.classList.remove("hidden");
-    }
-
-    function showContent(btn) {
-      const contentDiv = btn.parentElement.nextElementSibling;
-      contentDiv.classList.remove("hidden");
-      btn.parentElement.classList.add("hidden");
-    }
-
-    document.getElementById("search").addEventListener("input", function () {
-      const query = this.value.toLowerCase();
-      document.querySelectorAll(".book").forEach(book => {
-        const title = book.querySelector("h2").textContent.toLowerCase();
-        book.style.display = title.includes(query) ? "" : "none";
+    function searchBooks() {
+      const term = document.getElementById("search").value.toLowerCase();
+      const books = document.querySelectorAll(".book");
+      books.forEach(book => {
+        book.style.display = book.innerText.toLowerCase().includes(term) ? "block" : "none";
       });
-    });
+    }
 
     fetchBooks();
   </script>
