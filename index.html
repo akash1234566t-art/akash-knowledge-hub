@@ -1,71 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Akash Knowledge Hub</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <header>
-    <h1>📚 Akash Knowledge Hub</h1>
-    <input type="text" id="search" placeholder="Search for a book..." />
-  </header>
+Akash Knowledge Hub body { font-family: sans-serif; margin: 0; background: #f5f7fa; } header { background: #1e40af; color: white; padding: 1rem; text-align: center; } #search { width: 90%; margin: 1rem auto; padding: 0.5rem; display: block; border-radius: 6px; border: 1px solid #ccc; } .books-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; padding: 1rem; } .book { background: white; padding: 1rem; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); } .book img { width: 100%; border-radius: 12px; } .book h2 { margin: 0.5rem 0 0; font-size: 1.2rem; } .book p { margin: 0.25rem 0; } .btn { display: inline-block; margin-top: 0.5rem; padding: 0.5rem 1rem; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; } .btn:hover { background: #1e3a8a; } footer nav { position: fixed; bottom: 0; width: 100%; background: #e5e7eb; display: flex; justify-content: space-around; padding: 0.5rem 0; } footer nav a { text-decoration: none; color: #111; font-weight: bold; } 📚 Akash Knowledge Hub 
 
-  <main>
-    <div id="books">Loading books...</div>
-  </main>
+Home Owner Dashboard Upload Your Book Your Account const sheetURL = "https://opensheet.elk.sh/1dXl7SGH_QLvrCsAV8g0_ZOvNDrtxVuOVZFz8fQVKIUM/Sheet2"; async function loadBooks() { const res = await fetch(sheetURL); const books = await res.json(); const container = document.getElementById('books'); const searchInput = document.getElementById('search'); function renderBooks(filter = "") { container.innerHTML = ""; books.filter(book => book.Title.toLowerCase().includes(filter.toLowerCase()) ).forEach(book => { const div = document.createElement('div'); div.className = 'book'; div.innerHTML = ` ${book.Title} 
 
-  <footer>
-    <nav>
-      <a href="#">Home</a>
-      <a href="#">Owner Dashboard</a>
-      <a href="#">Upload Your Book</a>
-      <a href="#">Your Account</a>
-    </nav>
-  </footer>
+Price: ₹${book.Price}
 
-  <script>
-    const sheetID = "1CRLoeSt7c7bvHlg2NqggfexSoheBa7EN9hLzlT-v5LM"; // <-- Your Sheet ID
-    const sheetName = "Sheet1"; // or change to whatever your tab name is
-    const apiURL = `https://opensheet.elk.sh/${sheetID}/${sheetName}`;
+Buy Now ${book["PDF Link"] ? `📘 Download PDF` : ''} ${book["Summary Link"] ? `📝 Summary` : ''} ${book["Audio Link"] ? `` : ''} ${book["Action Plan"] ? `
 
-    async function loadBooks() {
-      const res = await fetch(apiURL);
-      const books = await res.json();
+Action Plan: ${book["Action Plan"]}
 
-      const booksDiv = document.getElementById("books");
-      booksDiv.innerHTML = "";
-
-      books.forEach(book => {
-        const bookCard = document.createElement("div");
-        bookCard.className = "book";
-
-        bookCard.innerHTML = `
-          <img src="${book["Cover Image URL"]}" alt="Cover">
-          <h2>${book.Title}</h2>
-          <p>Price: ₹${book.Price}</p>
-          <a class="btn" href="${book["PDF Link"]}" download>📥 Download Book</a>
-          ${book["Summary Link"] ? `<a class="btn" href="${book["Summary Link"]}" download>📝 Download Summary</a>` : ""}
-          ${book["Audio Link"] ? `<audio controls><source src="${book["Audio Link"]}" type="audio/mpeg">Your browser does not support audio.</audio>` : ""}
-          ${book["Action Plan"] ? `<a class="btn" href="${book["Action Plan"]}" download>✅ Action Plan</a>` : ""}
-        `;
-
-        booksDiv.appendChild(bookCard);
-      });
-    }
-
-    loadBooks();
-
-    // Optional: Add Search Filter
-    document.getElementById("search").addEventListener("input", function() {
-      const query = this.value.toLowerCase();
-      const bookCards = document.querySelectorAll(".book");
-      bookCards.forEach(card => {
-        const title = card.querySelector("h2").innerText.toLowerCase();
-        card.style.display = title.includes(query) ? "block" : "none";
-      });
-    });
-  </script>
-</body>
-</html>
+` : ''} `; container.appendChild(div); }); } searchInput.addEventListener('input', () => renderBooks(searchInput.value)); renderBooks(); } loadBooks(); 
