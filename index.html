@@ -60,7 +60,7 @@
           <img src="${book.Cover}" alt="${book.Title}" />
           <h2>${book.Title}</h2>
           <p><strong>Price:</strong> ₹${book.Price}</p>
-          <a href="upi://pay?pa=9270582266@ibl&pn=Akash%20Kadam&am=${book.Price}&cu=INR" class="btn" onclick="showConfirm(this)">Buy Now</a>
+          <a href="#" class="btn" onclick="payAndConfirm(this, '${book.Price}', '${book.Summary}', '${book.ActionPlan}', '${book.PDF}', '${book.Audio}')">Buy Now</a>
           <div class="hidden payment-confirm">
             <p><strong>Payment Done?</strong></p>
             <button onclick="confirmPayment(this, '${book.Summary}', '${book.ActionPlan}', '${book.PDF}', '${book.Audio}')">Yes</button>
@@ -80,8 +80,13 @@
       }
     }
 
-    function showConfirm(btn) {
-      btn.nextElementSibling.classList.remove("hidden");
+    function payAndConfirm(btn, amount, summary, action, pdf, audio) {
+      // Open UPI Payment
+      window.location.href = `upi://pay?pa=9270582266@ibl&pn=Akash%20Kadam&am=${amount}&cu=INR`;
+      // Show confirmation
+      setTimeout(() => {
+        btn.nextElementSibling.classList.remove("hidden");
+      }, 1000);
     }
 
     function confirmPayment(btn, summary, action, pdf, audio) {
