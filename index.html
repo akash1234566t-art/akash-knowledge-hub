@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,74 +8,88 @@
   <style>
     body { font-family: sans-serif; margin: 0; background: #f5f7fa; }
     header { background: #1e40af; color: white; padding: 1rem; text-align: center; }
+    nav { display: flex; justify-content: space-around; background: #e5e7eb; padding: 0.5rem 0; position: sticky; top: 0; z-index: 1000; }
+    nav a { text-decoration: none; color: #1e3a8a; font-weight: bold; }
     #search { width: 90%; margin: 1rem auto; padding: 0.5rem; display: block; border-radius: 6px; border: 1px solid #ccc; }
-    .book-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; padding: 1rem; }
-    .book { background: white; padding: 1rem; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .book-grid { display: flex; flex-wrap: wrap; justify-content: space-around; }
+    .book { background: white; margin: 1rem; padding: 1rem; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 30%; box-sizing: border-box; }
     .book img { width: 100%; border-radius: 12px; }
-    .book h2 { font-size: 1.2rem; margin: 0.5rem 0; }
-    .btn { display: block; text-align: center; margin-top: 0.5rem; background: #2563eb; color: white; padding: 0.5rem; border-radius: 6px; text-decoration: none; }
+    .book h2 { font-size: 1.1rem; margin-top: 0.5rem; }
+    .btn { display: inline-block; margin-top: 0.5rem; background: #2563eb; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 6px; }
+    .btn:hover { background: #1e3a8a; }
     audio { width: 100%; margin-top: 0.5rem; }
-    footer nav { position: fixed; bottom: 0; width: 100%; background: #e5e7eb; display: flex; justify-content: space-around; padding: 0.5rem 0; }
+    .hidden { display: none; }
+    @media (max-width: 768px) { .book { width: 90%; } }
   </style>
 </head>
 <body>
   <header>
     <h1>📚 Akash Knowledge Hub</h1>
-    <p>Read and Listen to Books | Pay via UPI</p>
+    <p>Read, Listen & Learn | Pay via UPI</p>
   </header>
 
-  <input type="text" id="search" placeholder="Search books..." oninput="searchBooks()" />
+  <nav>
+    <a href="#">Home</a>
+    <a href="#" onclick="showDashboard()">Owner Dashboard</a>
+    <a href="#">Upload Book</a>
+    <a href="#">Your Profile</a>
+  </nav>
 
-  <div id="books" class="book-grid"></div>
+  <input type="text" id="search" placeholder="Search books..." />
+  <div class="book-grid" id="bookContainer">Loading...</div>
 
-  <footer>
-    <nav>
-      <span>🏠 Home</span>
-      <span>📤 Upload</span>
-      <span>👤 Your Account</span>
-      <span>⚙️ Dashboard</span>
-    </nav>
-  </footer>
+  <div id="dashboard" class="hidden">
+    <h2 style="text-align:center;">Owner Dashboard</h2>
+    <p style="text-align:center;">🔐 Password protected (AkashKadam123)</p>
+  </div>
 
   <script>
-    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcOxLgaP_oMF4lRMPXvOqTkSi0jD4S7AYBEAYTNQvoVUTWKrK-TSVb7R0nMNZRV_G9cdUdc7kfhW1e/pub?output=tsv";
+    const sheetID = "1dXl7SGH_QLvrCsAV8g0_ZOvNDrtxVuOVZFz8fQVKIUM";
+    const sheetName = "Sheet2";
+    const apiURL = `https://opensheet.vercel.app/${sheetID}/${sheetName}`;
 
-    async function fetchBooks() {
-      const res = await fetch(sheetURL);
-      const data = await res.text();
-      const rows = data.trim().split("\n").slice(1);
-      const books = rows.map(row => {
-        const [title, cover, summary, audio, pdf, price, upi] = row.split("\t");
-        return { title, cover, summary, audio, pdf, price, upi };
-      });
+    async function loadBooks() {
+      const res = await fetch(apiURL);
+      const data = await res.json();
+      const container = document.getElementById("bookContainer");
+      container.innerHTML = "";
 
-      const booksContainer = document.getElementById("books");
-      booksContainer.innerHTML = "";
-      books.forEach(book => {
-        const bookEl = document.createElement("div");
-        bookEl.className = "book";
-        bookEl.innerHTML = `
-          <img src="${book.cover}" alt="Book Cover" />
-          <h2>${book.title}</h2>
-          <p>Price: ₹${book.price || 'Free'}</p>
-          <a class="btn" href="upi://pay?pa=${book.upi}&pn=${book.title}&am=${book.price}&cu=INR" target="_blank">Buy Now</a>
-          ${book.summary ? `<a class="btn" href="${book.summary}" download>Download Summary</a>` : ''}
-          ${book.pdf ? `<a class="btn" href="${book.pdf}" download>Download Book</a>` : ''}
-          ${book.audio ? `<audio controls><source src="${book.audio}" type="audio/mpeg" /></audio>` : ''}
+      data.forEach(book => {
+        const div = document.createElement("div");
+        div.className = "book";
+        div.innerHTML = `
+          <img src="${book.Cover}" alt="${book.Title}" />
+          <h2>${book.Title}</h2>
+          <p><strong>Price:</strong> ₹${book.Price}</p>
+          <a href="upi://pay?pa=9270582266@ibl&pn=Akash%20Kadam&am=${book.Price}&cu=INR" class="btn">Buy Now</a>
+          ${book.Summary ? `<a href="${book.Summary}" class="btn" download>Summary</a>` : ""}
+          ${book.ActionPlan ? `<a href="${book.ActionPlan}" class="btn" download>Action Plan</a>` : ""}
+          ${book.PDF ? `<a href="${book.PDF}" class="btn" download>Download Book</a>` : ""}
+          ${book.Audio ? `<audio controls src="${book.Audio}"></audio>` : ""}
         `;
-        booksContainer.appendChild(bookEl);
+        container.appendChild(div);
       });
     }
 
-    function searchBooks() {
-      const term = document.getElementById("search").value.toLowerCase();
+    document.getElementById("search").addEventListener("input", function() {
+      const query = this.value.toLowerCase();
       const books = document.querySelectorAll(".book");
       books.forEach(book => {
-        book.style.display = book.innerText.toLowerCase().includes(term) ? "block" : "none";
+        const title = book.querySelector("h2").textContent.toLowerCase();
+        book.style.display = title.includes(query) ? "block" : "none";
       });
+    });
+
+    function showDashboard() {
+      const pass = prompt("Enter Owner Password:");
+      if (pass === "AkashKadam123") {
+        document.getElementById("dashboard").classList.remove("hidden");
+      } else {
+        alert("Incorrect password!");
+      }
     }
 
-    fetchBooks();
+    loadBooks();
   </script>
 </body>
 </html>
