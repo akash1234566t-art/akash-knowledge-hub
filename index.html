@@ -1,11 +1,71 @@
-Akash Knowledge Hub body { font-family: sans-serif; margin: 0; background: #f5f7fa; } header { background: #1e40af; color: white; padding: 1rem; text-align: center; } #search { width: 90%; margin: 1rem auto; padding: 0.5rem; display: block; border-radius: 6px; border: 1px solid #ccc; } .books-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; padding: 1rem; } .book { background: white; padding: 1rem; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); } .book img { width: 100%; border-radius: 12px; } .book h2 { margin: 0.5rem 0 0; font-size: 1.2rem; } .book p { margin: 0.25rem 0; } .btn { display: inline-block; margin-top: 0.5rem; padding: 0.5rem 1rem; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; } .btn:hover { background: #1e3a8a; } footer nav { position: fixed; bottom: 0; width: 100%; background: #e5e7eb; display: flex; justify-content: space-around; padding: 0.5rem 0; } footer nav a { text-decoration: none; color: #111; font-weight: bold; } 📚 Akash Knowledge Hub 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Akash Knowledge Hub</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; background: #f5f7fa; }
+    header { background: #1e40af; color: white; padding: 1rem; text-align: center; }
+    #search { width: 90%; margin: 1rem auto; padding: 0.5rem; display: block; border-radius: 6px; border: 1px solid #ccc; }
+    .book-grid { display: flex; flex-wrap: wrap; justify-content: space-around; }
+    .book { background: white; margin: 1rem; padding: 1rem; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 30%; box-sizing: border-box; }
+    .book img { width: 100%; border-radius: 12px; }
+    .book h2 { font-size: 1.1rem; margin-top: 0.5rem; }
+    .btn { display: inline-block; margin-top: 0.5rem; background: #2563eb; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 6px; }
+    audio { width: 100%; margin-top: 0.5rem; }
+    @media (max-width: 768px) { .book { width: 100%; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📚 Akash Knowledge Hub</h1>
+    <p>Read, Listen & Learn | Pay via UPI</p>
+  </header>
 
-Home Owner Dashboard Upload Your Book Your Account const sheetURL = "https://opensheet.elk.sh/1dXl7SGH_QLvrCsAV8g0_ZOvNDrtxVuOVZFz8fQVKIUM/Sheet2"; async function loadBooks() { const res = await fetch(sheetURL); const books = await res.json(); const container = document.getElementById('books'); const searchInput = document.getElementById('search'); function renderBooks(filter = "") { container.innerHTML = ""; books.filter(book => book.Title.toLowerCase().includes(filter.toLowerCase()) ).forEach(book => { const div = document.createElement('div'); div.className = 'book'; div.innerHTML = ` ${book.Title} 
+  <input type="text" id="search" placeholder="Search books..." />
 
-Price: ₹${book.Price}
+  <div class="book-grid" id="bookContainer">Loading...</div>
 
-Buy Now ${book["PDF Link"] ? `📘 Download PDF` : ''} ${book["Summary Link"] ? `📝 Summary` : ''} ${book["Audio Link"] ? `` : ''} ${book["Action Plan"] ? `
+  <script>
+    const sheetID = "1dXl7SGH_QLvrCsAV8g0_ZOvNDrtxVuOVZFz8fQVKIUM";
+    const sheetName = "Sheet2"; // Update if your sheet name is different
+    const apiURL = `https://opensheet.vercel.app/${sheetID}/${sheetName}`;
 
-Action Plan: ${book["Action Plan"]}
+    async function loadBooks() {
+      const res = await fetch(apiURL);
+      const data = await res.json();
 
-` : ''} `; container.appendChild(div); }); } searchInput.addEventListener('input', () => renderBooks(searchInput.value)); renderBooks(); } loadBooks(); 
+      const container = document.getElementById("bookContainer");
+      container.innerHTML = "";
+
+      data.forEach(book => {
+        const div = document.createElement("div");
+        div.className = "book";
+        div.innerHTML = `
+          <img src="${book.Cover}" alt="${book.Title}" />
+          <h2>${book.Title}</h2>
+          <p><strong>Price:</strong> ₹${book.Price}</p>
+          <a href="upi://pay?pa=9270582266@ibl&pn=Akash%20Kadam&am=${book.Price}&cu=INR" class="btn">Buy Now</a>
+          ${book.Summary ? `<a href="${book.Summary}" class="btn" download>Summary</a>` : ""}
+          ${book.ActionPlan ? `<a href="${book.ActionPlan}" class="btn" download>Action Plan</a>` : ""}
+          ${book.PDF ? `<a href="${book.PDF}" class="btn" download>Download Book</a>` : ""}
+          ${book.Audio ? `<audio controls src="${book.Audio}"></audio>` : ""}
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    document.getElementById("search").addEventListener("input", function() {
+      const query = this.value.toLowerCase();
+      const books = document.querySelectorAll(".book");
+      books.forEach(book => {
+        const title = book.querySelector("h2").textContent.toLowerCase();
+        book.style.display = title.includes(query) ? "block" : "none";
+      });
+    });
+
+    loadBooks();
+  </script>
+</body>
+</html>
