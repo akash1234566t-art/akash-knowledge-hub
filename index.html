@@ -25,9 +25,7 @@
   <header>
     <h1>📚 Akash Knowledge Hub</h1>
     <p>Read, Listen & Learn | Pay via UPI</p>
-    <!-- QR Image added here -->
-    <img src="https://i.ibb.co/kgNcpj3C/Screenshot-20250720-162125-Phone-Pe.webp" alt="Scan to Pay QR" style="width: 200px; display: block; margin: 1rem auto;" />
-    <p style="text-align: center; font-weight: bold;">UPI ID: 9270582266@ibl</p>
+    <img src="https://i.ibb.co/kgNcpj3C/Screenshot-20250720-162125-Phone-Pe.webp" alt="UPI QR" style="width: 200px; margin-top: 1rem;" />
   </header>
 
   <nav>
@@ -49,6 +47,14 @@
     const sheetID = "1dXl7SGH_QLvrCsAV8g0_ZOvNDrtxVuOVZFz8fQVKIUM";
     const sheetName = "Sheet2";
     const apiURL = `https://opensheet.vercel.app/${sheetID}/${sheetName}`;
+
+    function convertToDownloadLink(link) {
+      const match = link.match(/\/d\/([a-zA-Z0-9_-]{10,})/);
+      if (match && match[1]) {
+        return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+      }
+      return link;
+    }
 
     async function loadBooks() {
       const res = await fetch(apiURL);
@@ -94,13 +100,133 @@
       let parent = btn.parentElement;
       parent.innerHTML = "";
 
-      if (summary && summary !== "null") parent.innerHTML += `<a href="${summary}" class="btn" download>Summary</a>`;
-      if (action && action !== "null") parent.innerHTML += `<a href="${action}" class="btn" download>Action Plan</a>`;
-      if (pdf && pdf !== "null") parent.innerHTML += `<a href="${pdf}" class="btn" download>Download Book</a>`;
-      if (audio && audio !== "null") parent.innerHTML += `<audio controls src="${audio}"></audio>`;
+      if (summary && summary !== "null") parent.innerHTML += `<a href="${convertToDownloadLink(summary)}" class="btn" download>Summary</a>`;
+      if (action && action !== "null") parent.innerHTML += `<a href="${convertToDownloadLink(action)}" class="btn" download>Action Plan</a>`;
+      if (pdf && pdf !== "null") parent.innerHTML += `<a href="${convertToDownloadLink(pdf)}" class="btn" download>Download Book</a>`;
+      if (audio && audio !== "null") parent.innerHTML += `<audio controls src="${convertToDownloadLink(audio)}"></audio>`;
     }
 
-    document.getElementById("search").addEventListener("input", function() {
+    document.getElementById("search").addEventListener("input", function () {
+      const query = this.value.toLowerCase();
+      const books = document.querySelectorAll(".book");
+      books.forEach(book => {
+        const title = book.querySelector("h2").textContent.toLowerCase();
+        book.style.display = title.includes(query) ? "block" : "none";
+      });
+    });
+
+    loadBooks();
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Akash Knowledge Hub</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; background: #f5f7fa; }
+    header { background: #1e40af; color: white; padding: 1rem; text-align: center; }
+    nav { display: flex; justify-content: space-around; background: #e5e7eb; padding: 0.5rem 0; position: sticky; top: 0; z-index: 1000; }
+    nav a { text-decoration: none; color: #1e3a8a; font-weight: bold; }
+    #search { width: 90%; margin: 1rem auto; padding: 0.5rem; display: block; border-radius: 6px; border: 1px solid #ccc; }
+    .book-grid { display: flex; flex-wrap: wrap; justify-content: space-around; }
+    .book { background: white; margin: 1rem; padding: 1rem; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 30%; box-sizing: border-box; }
+    .book img { width: 100%; border-radius: 12px; }
+    .book h2 { font-size: 1.1rem; margin-top: 0.5rem; }
+    .btn { display: inline-block; margin-top: 0.5rem; background: #2563eb; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 6px; }
+    .btn:hover { background: #1e3a8a; }
+    audio { width: 100%; margin-top: 0.5rem; }
+    .hidden { display: none; }
+    @media (max-width: 768px) { .book { width: 90%; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📚 Akash Knowledge Hub</h1>
+    <p>Read, Listen & Learn | Pay via UPI</p>
+    <img src="https://i.ibb.co/kgNcpj3C/Screenshot-20250720-162125-Phone-Pe.webp" alt="UPI QR" style="width: 200px; margin-top: 1rem;" />
+  </header>
+
+  <nav>
+    <a href="#">Home</a>
+    <a href="#" onclick="showDashboard()">Owner Dashboard</a>
+    <a href="#">Upload Book</a>
+    <a href="#">Your Profile</a>
+  </nav>
+
+  <input type="text" id="search" placeholder="Search books..." />
+  <div class="book-grid" id="bookContainer">Loading...</div>
+
+  <div id="dashboard" class="hidden">
+    <h2 style="text-align:center;">Owner Dashboard</h2>
+    <p style="text-align:center;">🔐 Password protected (AkashKadam123)</p>
+  </div>
+
+  <script>
+    const sheetID = "1dXl7SGH_QLvrCsAV8g0_ZOvNDrtxVuOVZFz8fQVKIUM";
+    const sheetName = "Sheet2";
+    const apiURL = `https://opensheet.vercel.app/${sheetID}/${sheetName}`;
+
+    function convertToDownloadLink(link) {
+      const match = link.match(/\/d\/([a-zA-Z0-9_-]{10,})/);
+      if (match && match[1]) {
+        return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+      }
+      return link;
+    }
+
+    async function loadBooks() {
+      const res = await fetch(apiURL);
+      const data = await res.json();
+      const container = document.getElementById("bookContainer");
+      container.innerHTML = "";
+
+      data.forEach(book => {
+        const div = document.createElement("div");
+        div.className = "book";
+        div.innerHTML = `
+          <img src="${book.Cover}" alt="${book.Title}" />
+          <h2>${book.Title}</h2>
+          <p><strong>Price:</strong> ₹${book.Price}</p>
+          <a href="#" class="btn" onclick="payAndConfirm(this, '${book.Price}', '${book.Summary}', '${book.ActionPlan}', '${book.PDF}', '${book.Audio}')">Buy Now</a>
+          <div class="hidden payment-confirm">
+            <p><strong>Payment Done?</strong></p>
+            <button onclick="confirmPayment(this, '${book.Summary}', '${book.ActionPlan}', '${book.PDF}', '${book.Audio}')">Yes</button>
+            <button onclick="this.parentElement.classList.add('hidden')">No</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function showDashboard() {
+      const pass = prompt("Enter Owner Password:");
+      if (pass === "AkashKadam123") {
+        document.getElementById("dashboard").classList.remove("hidden");
+      } else {
+        alert("Incorrect password!");
+      }
+    }
+
+    function payAndConfirm(btn, amount, summary, action, pdf, audio) {
+      window.location.href = `upi://pay?pa=9270582266@ibl&pn=Akash%20Kadam&am=${amount}&cu=INR`;
+      setTimeout(() => {
+        btn.nextElementSibling.classList.remove("hidden");
+      }, 1000);
+    }
+
+    function confirmPayment(btn, summary, action, pdf, audio) {
+      let parent = btn.parentElement;
+      parent.innerHTML = "";
+
+      if (summary && summary !== "null") parent.innerHTML += `<a href="${convertToDownloadLink(summary)}" class="btn" download>Summary</a>`;
+      if (action && action !== "null") parent.innerHTML += `<a href="${convertToDownloadLink(action)}" class="btn" download>Action Plan</a>`;
+      if (pdf && pdf !== "null") parent.innerHTML += `<a href="${convertToDownloadLink(pdf)}" class="btn" download>Download Book</a>`;
+      if (audio && audio !== "null") parent.innerHTML += `<audio controls src="${convertToDownloadLink(audio)}"></audio>`;
+    }
+
+    document.getElementById("search").addEventListener("input", function () {
       const query = this.value.toLowerCase();
       const books = document.querySelectorAll(".book");
       books.forEach(book => {
