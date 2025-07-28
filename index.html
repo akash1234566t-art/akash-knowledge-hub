@@ -18,6 +18,7 @@
     .btn:hover { background: #1e3a8a; }
     audio { width: 100%; margin-top: 0.5rem; }
     .hidden { display: none; }
+    .qr-box img { width: 100%; max-width: 200px; display: block; margin: 1rem auto; }
     @media (max-width: 768px) { .book { width: 90%; } }
   </style>
 </head>
@@ -46,7 +47,7 @@
     const sheetID = "1dXl7SGH_QLvrCsAV8g0_ZOvNDrtxVuOVZFz8fQVKIUM";
     const sheetName = "Sheet2";
     const apiURL = `https://opensheet.vercel.app/${sheetID}/${sheetName}`;
-    const qrImageURL = "https://i.ibb.co/2Y8Btjw/qr.png"; // तुमचा QR कोड image URL
+    const qrImageURL = "https://i.ibb.co/LCxd0Ym/qr.png"; // तुमचा दिलेला QR कोड
 
     async function loadBooks() {
       const res = await fetch(apiURL);
@@ -62,7 +63,14 @@
           <h2>${book.Title}</h2>
           <p><strong>Price:</strong> ₹${book.Price}</p>
           <a href="#" class="btn" onclick="payAndConfirm(this, '${book.Price}', '${book.Summary}', '${book.ActionPlan}', '${book.PDF}', '${book.Audio}')">Buy Now</a>
-          <div class="hidden payment-confirm"></div>
+          <div class="hidden payment-confirm qr-box">
+            <p><strong>Step 1: Scan to Pay</strong></p>
+            <img src="${qrImageURL}" alt="Scan UPI QR">
+            <p style="text-align:center;">or pay to <strong>9270582266@ibl</strong></p>
+            <p><strong>Step 2: Payment Done?</strong></p>
+            <button onclick="confirmPayment(this, '${book.Summary}', '${book.ActionPlan}', '${book.PDF}', '${book.Audio}')">Yes</button>
+            <button onclick="this.parentElement.classList.add('hidden')">No</button>
+          </div>
         `;
         container.appendChild(div);
       });
@@ -78,15 +86,9 @@
     }
 
     function payAndConfirm(btn, amount, summary, action, pdf, audio) {
-      const paymentHTML = `
-        <p><strong>Step 1:</strong> Pay ₹${amount} to UPI ID <span style="color:green;">9270582266@ibl</span></p>
-        <img src="${qrImageURL}" alt="Scan QR" style="width:100%;max-width:200px;border-radius:12px;display:block;margin:auto;" />
-        <p><strong>Step 2:</strong> After payment, click below</p>
-        <button onclick="confirmPayment(this, '${summary}', '${action}', '${pdf}', '${audio}')" class="btn">✅ Yes, Payment Done</button>
-        <button onclick="this.parentElement.classList.add('hidden')" class="btn" style="background:#ccc;color:#000;">❌ No</button>
-      `;
-      btn.nextElementSibling.innerHTML = paymentHTML;
-      btn.nextElementSibling.classList.remove("hidden");
+      setTimeout(() => {
+        btn.nextElementSibling.classList.remove("hidden");
+      }, 500);
     }
 
     function confirmPayment(btn, summary, action, pdf, audio) {
@@ -111,4 +113,4 @@
     loadBooks();
   </script>
 </body>
-</html>        
+</html>
