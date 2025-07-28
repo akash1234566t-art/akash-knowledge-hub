@@ -18,7 +18,6 @@
     .btn:hover { background: #1e3a8a; }
     audio { width: 100%; margin-top: 0.5rem; }
     .hidden { display: none; }
-    .qr-box img { width: 100%; max-width: 200px; display: block; margin: 1rem auto; }
     @media (max-width: 768px) { .book { width: 90%; } }
   </style>
 </head>
@@ -26,6 +25,9 @@
   <header>
     <h1>📚 Akash Knowledge Hub</h1>
     <p>Read, Listen & Learn | Pay via UPI</p>
+    <!-- QR Image added here -->
+    <img src="https://i.ibb.co/kgNcpj3C/Screenshot-20250720-162125-Phone-Pe.webp" alt="Scan to Pay QR" style="width: 200px; display: block; margin: 1rem auto;" />
+    <p style="text-align: center; font-weight: bold;">UPI ID: 9270582266@ibl</p>
   </header>
 
   <nav>
@@ -47,7 +49,6 @@
     const sheetID = "1dXl7SGH_QLvrCsAV8g0_ZOvNDrtxVuOVZFz8fQVKIUM";
     const sheetName = "Sheet2";
     const apiURL = `https://opensheet.vercel.app/${sheetID}/${sheetName}`;
-    const qrImageURL = "https://i.ibb.co/LCxd0Ym/qr.png"; // तुमचा दिलेला QR कोड
 
     async function loadBooks() {
       const res = await fetch(apiURL);
@@ -63,11 +64,8 @@
           <h2>${book.Title}</h2>
           <p><strong>Price:</strong> ₹${book.Price}</p>
           <a href="#" class="btn" onclick="payAndConfirm(this, '${book.Price}', '${book.Summary}', '${book.ActionPlan}', '${book.PDF}', '${book.Audio}')">Buy Now</a>
-          <div class="hidden payment-confirm qr-box">
-            <p><strong>Step 1: Scan to Pay</strong></p>
-            <img src="${qrImageURL}" alt="Scan UPI QR">
-            <p style="text-align:center;">or pay to <strong>9270582266@ibl</strong></p>
-            <p><strong>Step 2: Payment Done?</strong></p>
+          <div class="hidden payment-confirm">
+            <p><strong>Payment Done?</strong></p>
             <button onclick="confirmPayment(this, '${book.Summary}', '${book.ActionPlan}', '${book.PDF}', '${book.Audio}')">Yes</button>
             <button onclick="this.parentElement.classList.add('hidden')">No</button>
           </div>
@@ -86,9 +84,10 @@
     }
 
     function payAndConfirm(btn, amount, summary, action, pdf, audio) {
+      window.location.href = `upi://pay?pa=9270582266@ibl&pn=Akash%20Kadam&am=${amount}&cu=INR`;
       setTimeout(() => {
         btn.nextElementSibling.classList.remove("hidden");
-      }, 500);
+      }, 1000);
     }
 
     function confirmPayment(btn, summary, action, pdf, audio) {
