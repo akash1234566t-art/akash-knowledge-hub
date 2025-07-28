@@ -1,0 +1,8 @@
+body { font-family: sans-serif; margin: 0; background: #f5f7fa; }
+header { background: #1e40af; color: white; padding: 1rem; text-align: center; }
+#search { width: 90%; margin: 1rem auto; padding: 0.5rem; display: block; border-radius: 6px; border: 1px solid #ccc; }
+.book { background: white; margin: 1rem; padding: 1rem; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.book img { width: 100%; border-radius: 12px; }
+.book h2 { margin-top: 0.5rem; }
+button, .btn { padding: 0.6rem 1rem; margin-top: 0.5rem; background: #2563eb; color: white; border: none; border-radius: 6px; }
+footer nav { position: fixed; bottom: 0; width: 100%; background: #e5e7eb; display: flex; justify-content: space-around; padding: 0.5rem 0; }
