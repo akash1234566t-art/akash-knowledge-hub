@@ -2,24 +2,70 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Akash Knowledge Hub</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
     <h1>📚 Akash Knowledge Hub</h1>
-    <input id="search" placeholder="Search books..." />
+    <input type="text" id="search" placeholder="Search for a book..." />
   </header>
-  <main id="book-list"></main>
+
+  <main>
+    <div id="books">Loading books...</div>
+  </main>
+
   <footer>
     <nav>
-      <button>Home</button>
-      <button>Upload Your Book</button>
-      <button>Owner Dashboard</button>
-      <button>Your Account</button>
+      <a href="#">Home</a>
+      <a href="#">Owner Dashboard</a>
+      <a href="#">Upload Your Book</a>
+      <a href="#">Your Account</a>
     </nav>
   </footer>
-  <script src="script.js"></script>
+
+  <script>
+    const sheetID = "1CRLoeSt7c7bvHlg2NqggfexSoheBa7EN9hLzlT-v5LM"; // <-- Your Sheet ID
+    const sheetName = "Sheet1"; // or change to whatever your tab name is
+    const apiURL = `https://opensheet.elk.sh/${sheetID}/${sheetName}`;
+
+    async function loadBooks() {
+      const res = await fetch(apiURL);
+      const books = await res.json();
+
+      const booksDiv = document.getElementById("books");
+      booksDiv.innerHTML = "";
+
+      books.forEach(book => {
+        const bookCard = document.createElement("div");
+        bookCard.className = "book";
+
+        bookCard.innerHTML = `
+          <img src="${book["Cover Image URL"]}" alt="Cover">
+          <h2>${book.Title}</h2>
+          <p>Price: ₹${book.Price}</p>
+          <a class="btn" href="${book["PDF Link"]}" download>📥 Download Book</a>
+          ${book["Summary Link"] ? `<a class="btn" href="${book["Summary Link"]}" download>📝 Download Summary</a>` : ""}
+          ${book["Audio Link"] ? `<audio controls><source src="${book["Audio Link"]}" type="audio/mpeg">Your browser does not support audio.</audio>` : ""}
+          ${book["Action Plan"] ? `<a class="btn" href="${book["Action Plan"]}" download>✅ Action Plan</a>` : ""}
+        `;
+
+        booksDiv.appendChild(bookCard);
+      });
+    }
+
+    loadBooks();
+
+    // Optional: Add Search Filter
+    document.getElementById("search").addEventListener("input", function() {
+      const query = this.value.toLowerCase();
+      const bookCards = document.querySelectorAll(".book");
+      bookCards.forEach(card => {
+        const title = card.querySelector("h2").innerText.toLowerCase();
+        card.style.display = title.includes(query) ? "block" : "none";
+      });
+    });
+  </script>
 </body>
 </html>
