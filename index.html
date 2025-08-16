@@ -1,81 +1,29 @@
 <!DOCTYPE html>
-<html lang="mr">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Akash Knowledge Hub</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
-    header { background: #4CAF50; color: white; padding: 15px; text-align: center; font-size: 22px; }
-    .search-bar { text-align: center; padding: 10px; }
-    .search-bar input { width: 80%; padding: 8px; font-size: 16px; }
-    .book-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
-    .book-card { background: white; border-radius: 10px; padding: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); text-align: center; }
-    .book-card img { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; }
-    .book-card h3 { font-size: 18px; margin: 10px 0; }
-    .book-card button { background: #4CAF50; color: white; border: none; padding: 10px; margin-top: 5px; width: 100%; border-radius: 5px; cursor: pointer; }
-    .book-card button:hover { background: #45a049; }
-    .hidden { display: none; }
-    .summary { font-size: 14px; margin-top: 8px; color: #333; }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- Top Search Bar -->
+  <header>
+    <input type="text" id="searchBar" placeholder="Search for books..." />
+  </header>
 
-  <header>📚 Akash Knowledge Hub</header>
+  <!-- Book Grid -->
+  <main id="bookContainer"></main>
 
-  <div class="search-bar">
-    <input type="text" id="searchBox" placeholder="Search books...">
-  </div>
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button onclick="navigate('home')">Home</button>
+    <button onclick="navigate('dashboard')">Owner Dashboard</button>
+    <button onclick="navigate('upload')">Upload Your Book</button>
+    <button onclick="navigate('account')">Your Account</button>
+  </nav>
 
-  <div class="book-list" id="bookList"></div>
-
-  <script>
-    async function loadBooks() {
-      const response = await fetch("books.json");
-      const books = await response.json();
-      displayBooks(books);
-
-      document.getElementById("searchBox").addEventListener("input", function() {
-        const query = this.value.toLowerCase();
-        const filtered = books.filter(b => b.title.toLowerCase().includes(query));
-        displayBooks(filtered);
-      });
-    }
-
-    function displayBooks(books) {
-      const bookList = document.getElementById("bookList");
-      bookList.innerHTML = "";
-
-      books.forEach(book => {
-        const card = document.createElement("div");
-        card.className = "book-card";
-
-        card.innerHTML = `
-          <img src="${book.cover}" alt="${book.title}">
-          <h3>${book.title}</h3>
-          <p class="summary">${book.summary}</p>
-          <p><b>Price: ₹${book.price}</b></p>
-          <button onclick="buyBook('${book.pdf}')">Buy Now</button>
-          <a id="download-${book.title}" href="${book.pdf}" class="hidden" target="_blank">📥 Download Book</a>
-        `;
-
-        bookList.appendChild(card);
-      });
-    }
-
-    function buyBook(pdfLink) {
-      alert("Please complete the UPI payment.\nOpening PhonePe/Google Pay...");
-      setTimeout(() => {
-        if (confirm("Payment Done?")) {
-          window.open(pdfLink, "_blank");
-        } else {
-          alert("Payment not completed.");
-        }
-      }, 3000);
-    }
-
-    loadBooks();
-  </script>
-
+  <!-- Script (नाव नक्की "script.js" असायला पाहिजे, S capital नको) -->
+  <script src="script.js"></script>
 </body>
 </html>
