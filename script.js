@@ -1,14 +1,12 @@
-// Sample book data
 const books = [
   {
-    title: "5 Steps to Become a Millionaire",
-    cover: "https://i.ibb.co/nZJxTdz/Screenshot-20250728-171827-Chat-GPT.webp",
-    pdf: "https://www.dropbox.com/scl/fi/yofyacl1tq192kpxxohtp/5_Steps_to_Become_a_Millionaire-1-1.pdf?rlkey=ztv1w1zbdoilmve1d",
-    price: 20
+    title: "Test Book",
+    cover: "https://via.placeholder.com/150",
+    pdf: "https://example.com/test.pdf",
+    price: 10
   }
 ];
 
-// Load books
 function loadBooks() {
   const container = document.getElementById("bookContainer");
   container.innerHTML = "";
@@ -25,14 +23,8 @@ function loadBooks() {
 }
 
 function buyBook(link) {
-  const done = confirm("Pay via UPI, then click OK if payment is done.");
-  if (done) {
-    window.open(link, "_blank");
-  }
-}
-
-function navigate(page) {
-  alert("Navigate to: " + page);
+  alert("Pretend payment done ✅");
+  window.open(link, "_blank");
 }
 
 loadBooks();
